@@ -47,7 +47,7 @@ fn default_db_host() -> String {
 }
 
 fn default_db_port() -> u64 {
-    26572
+    26257
 }
 
 fn default_db_cert_file() -> String {
