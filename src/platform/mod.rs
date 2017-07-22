@@ -1,4 +1,87 @@
-pub mod connection;
+use postgres::{Connection, TlsMode};
+#[cfg(feature = "with-openssl")]
+use postgres::tls::openssl::OpenSsl;
+use openssl::ssl::{SslMethod, SslConnectorBuilder};
+use openssl::x509::X509_FILETYPE_PEM;
+
+use r2d2;
+use r2d2_postgres::PostgresConnectionManager;
+use r2d2_postgres::TlsMode as R2d2TlsMode;
+
+pub struct Database {
+    conn_string: String,
+    ssl: OpenSsl,
+}
+
+impl Database {
+    pub fn new(c: Config) -> Database {
+        let cs = connection_string(
+            c.user,
+            c.host,
+            c.port,
+            c.name);
+        let negotiator = ssl_builder(
+            c.cert_file,
+            c.cert_key_file,
+            c.ca_file);
+        Database {
+            conn_string: cs,
+            ssl: negotiator
+        }
+    }
+
+    pub fn connect(self) -> Connection {
+        Connection::connect(
+            self.conn_string,
+            TlsMode::Require(&self.ssl)).unwrap()
+        }
+
+    pub fn pool (self) -> r2d2::Pool<PostgresConnectionManager> {
+        let manager = PostgresConnectionManager::new(
+            self.conn_string,
+            R2d2TlsMode::Require(Box::new(self.ssl)))
+            .unwrap();
+        // TODO Allow configuring of pool settings
+        let config = r2d2::Config::default();
+        r2d2::Pool::new(config, manager).unwrap()
+    }
+}
+
+fn connection_string(
+    user: String,
+    host: String,
+    port: u64,
+    name: String)
+    -> String {
+        format!(
+            "postgres://{a}@{b}:{c}/{d}",
+            a = user,
+            b = host,
+            c = port,
+            d = name)
+    }
+
+fn ssl_builder(
+    cert_file: String,
+    cert_key_file: String,
+    ca_file: String)
+    -> OpenSsl {
+        let mut builder = SslConnectorBuilder::new(SslMethod::tls()).unwrap();
+        builder
+            .builder_mut()
+            .set_ca_file(ca_file)
+            .unwrap();
+        builder
+            .builder_mut()
+            .set_certificate_file(cert_file, X509_FILETYPE_PEM)
+            .unwrap();
+        builder
+            .builder_mut()
+            .set_private_key_file(cert_key_file, X509_FILETYPE_PEM)
+            .unwrap();
+
+        OpenSsl::from(builder.build())
+    }
 
 #[derive(Debug, Deserialize)]
 pub struct Config {

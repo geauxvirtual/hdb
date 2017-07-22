@@ -11,4 +11,5 @@ openssl = { version = "0.9", optional = true }
 postgres = { version = "0.14", features = ["with-openssl"] }
 serde = "1.0"
 serde_derive = "1.0"
+r2d2 = "0.7"
 r2d2_postgres = "0.12"
