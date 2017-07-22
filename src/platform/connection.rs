@@ -4,7 +4,7 @@ use postgres::tls::openssl::OpenSsl;
 use openssl::ssl::{SslMethod, SslConnectorBuilder};
 use openssl::x509::X509_FILETYPE_PEM;
 
-use platform::DatabaseConfig;
+use platform::config::DatabaseConfig;
 
 pub fn connect(db: DatabaseConfig) -> Connection {
     // Configure the connection string
