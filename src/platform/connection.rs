@@ -4,9 +4,9 @@ use postgres::tls::openssl::OpenSsl;
 use openssl::ssl::{SslMethod, SslConnectorBuilder};
 use openssl::x509::X509_FILETYPE_PEM;
 
-use platform::config::DatabaseConfig;
+use platform::Config;
 
-pub fn connect(db: DatabaseConfig) -> Connection {
+pub fn connect(db: Config) -> Connection {
     // Configure the connection string
     let cs = connection_string(
         db.user,
@@ -29,7 +29,7 @@ pub fn connect(db: DatabaseConfig) -> Connection {
 use r2d2_postgres::PostgresConnectionManager;
 use r2d2_postgres::TlsMode as R2d2TlsMode;
 
-pub fn connection_manager(db: DatabaseConfig) -> PostgresConnectionManager {
+pub fn connection_manager(db: Config) -> PostgresConnectionManager {
     let cs = connection_string(
         db.user,
         db.host,
