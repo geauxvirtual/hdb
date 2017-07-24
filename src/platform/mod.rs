@@ -8,6 +8,8 @@ use r2d2;
 use r2d2_postgres::PostgresConnectionManager;
 use r2d2_postgres::TlsMode as R2d2TlsMode;
 
+pub type Pool = r2d2::Pool<PostgresConnectionManager>;
+
 pub struct Database {
     conn_string: String,
     ssl: OpenSsl,
@@ -36,7 +38,7 @@ impl Database {
             TlsMode::Require(&self.ssl)).unwrap()
         }
 
-    pub fn pool (self) -> r2d2::Pool<PostgresConnectionManager> {
+    pub fn pool (self) -> Pool {
         let manager = PostgresConnectionManager::new(
             self.conn_string,
             R2d2TlsMode::Require(Box::new(self.ssl)))
