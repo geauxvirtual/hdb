@@ -9,7 +9,7 @@ use r2d2_postgres::PostgresConnectionManager;
 use r2d2_postgres::TlsMode as R2d2TlsMode;
 
 pub type Pool = r2d2::Pool<PostgresConnectionManager>;
-pub struct PoolConn(pub r2d2::PooledConnection<PostgresConnectionManager>);
+pub type PoolConnection = r2d2::PooledConnection<PostgresConnectionManager>;
 
 pub struct Database {
     conn_string: String,
