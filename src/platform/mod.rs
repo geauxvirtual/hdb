@@ -8,6 +8,8 @@ use r2d2;
 use r2d2_postgres::PostgresConnectionManager;
 use r2d2_postgres::TlsMode as R2d2TlsMode;
 
+pub mod models;
+
 pub type Pool = r2d2::Pool<PostgresConnectionManager>;
 pub type PoolConnection = r2d2::PooledConnection<PostgresConnectionManager>;
 
