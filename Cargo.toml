@@ -5,11 +5,16 @@ authors = ["Justin Guidroz <justin.guidroz@gmail.com>"]
 
 [features]
 with-openssl = ["openssl"]
+with-uuid = ["postgres-shared/with-uuid"]
+with-chrono = ["postgres-shared/with-chrono"]
 
 [dependencies]
 openssl = { version = "0.9", optional = true }
-postgres = { version = "0.14", features = ["with-openssl"] }
+postgres = { version = "0.15", features = ["with-openssl", "with-uuid", "with-chrono"] }
+postgres-shared = { version = "0.4", optional = true }
 serde = "1.0"
 serde_derive = "1.0"
 r2d2 = "0.7"
-r2d2_postgres = "0.12"
+r2d2_postgres = "0.13"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = {version = "0.5", features = ["serde", "v4"] }
