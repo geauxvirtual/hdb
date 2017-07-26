@@ -27,14 +27,19 @@ impl User {
     }
 }
 
-pub fn exists(username: String, conn: Connection) -> bool {
+pub fn exists(username: &str, conn: &Connection) -> bool {
     let stmt = conn
         .prepare("SELECT username FROM users WHERE username = $1;")
         .unwrap();
-    stmt.query(&[&username]).unwrap().is_empty()
+    let is_empty = stmt.query(&[&username]).unwrap().is_empty();
+    if is_empty {
+        false
+    } else {
+        true
+    }
 }
 
-pub fn create(user: NewUser, conn: Connection) -> bool {
+pub fn create(user: NewUser, conn: &Connection) -> bool {
     let stmt = conn
         .prepare("INSERT INTO users
         (username, salt, password, active, created_on)
@@ -54,7 +59,7 @@ pub fn create(user: NewUser, conn: Connection) -> bool {
     true
 }
 
-pub fn get_by_username(username: String, conn: Connection) -> Result<User, &'static str> {
+pub fn get_by_username(username: &str, conn: &Connection) -> Result<User, &'static str> {
     let stmt =  conn
         .prepare("SELECT * FROM users WHERE username = $1;")
         .unwrap();
