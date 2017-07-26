@@ -10,6 +10,7 @@ use r2d2_postgres::TlsMode as R2d2TlsMode;
 
 pub mod models;
 
+pub type PlatformConnection = Connection;
 pub type Pool = r2d2::Pool<PostgresConnectionManager>;
 pub type PoolConnection = r2d2::PooledConnection<PostgresConnectionManager>;
 
@@ -91,7 +92,7 @@ fn ssl_builder(
 #[derive(Debug, Deserialize)]
 pub struct Config {
     #[serde(default = "default_db_name")]
-    pub(crate) name: String,
+    pub name: String,
 
     #[serde(default = "default_db_user")]
     pub user: String,
