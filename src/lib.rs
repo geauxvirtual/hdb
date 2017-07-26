@@ -12,10 +12,3 @@ extern crate chrono;
 extern crate uuid;
 
 pub mod platform;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-    }
-}
