@@ -2,6 +2,7 @@
 use chrono::{DateTime, Utc};
 use postgres::Connection;
 
+#[derive(Deserialize)]
 pub struct NewUser {
     pub username: String,
     pub salt: Vec<u8>,
