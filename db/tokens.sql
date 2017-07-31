@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS user_tokens;
+
+CREATE TABLE user_tokens (
+		id SERIAL PRIMARY KEY,
+		username STRING UNIQUE NOT NULL,
+		token BYTES UNIQUE NOT NULL,
+		expires TIMESTAMPTZ NOT NULL
+);
