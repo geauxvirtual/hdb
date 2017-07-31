@@ -1,4 +1,4 @@
-//use uuid;
+use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use postgres::Connection;
 
@@ -13,7 +13,7 @@ pub struct NewUser {
 
 #[derive(Debug)]
 pub struct User {
-    pub id: Vec<u8>,
+    pub id: Uuid,
     pub username: String,
     pub salt: Vec<u8>,
     pub password: Vec<u8>,
@@ -64,9 +64,11 @@ pub fn get_by_username(username: &str, conn: &Connection) -> Result<User, &'stat
         .prepare("SELECT * FROM users WHERE username = $1;")
         .unwrap();
     for row in &stmt.query(&[&username]).unwrap() {
+        let id: Vec<u8> = row.get(0);
+        let user_id = Uuid::from_bytes(&id).unwrap();
         return Ok(
             User {
-                id: row.get(0),
+                id: user_id,
                 username: row.get(1),
                 salt: row.get(2),
                 password: row.get(3),
