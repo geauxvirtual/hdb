@@ -1,8 +1,11 @@
+use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use postgres::Connection;
 
+use super::*;
+
 pub struct NewUserToken {
-    pub username: String,
+    pub user_id: Uuid,
     pub token: Vec<u8>,
     pub expires: DateTime<Utc>,
 }
@@ -10,7 +13,7 @@ pub struct NewUserToken {
 #[derive(Debug)]
 pub struct UserToken {
     pub id: i64,
-    pub username: String,
+    pub user_id: Uuid,
     pub token: Vec<u8>,
     pub expires: DateTime<Utc>,
 }
@@ -18,12 +21,12 @@ pub struct UserToken {
 pub fn create(token: NewUserToken, conn: &Connection) -> bool {
     let stmt = conn
         .prepare("INSERT INTO user_tokens
-        (username, token, expires)
+        (user_id, token, expires)
         VALUES
         ($1, $2, $3);")
         .unwrap();
     let success = stmt.execute(&[
-                 &token.username,
+                 &token.user_id.as_bytes().to_vec(),
                  &token.token,
                  &token.expires])
         .unwrap();
@@ -33,31 +36,16 @@ pub fn create(token: NewUserToken, conn: &Connection) -> bool {
     true
 }
 
-pub fn get_by_token(token: &Vec<u8>, conn: &Connection) -> Result<UserToken, &'static str> {
+pub fn get_by_user_id(user_id: &Uuid, conn: &Connection) -> Result<UserToken, &'static str> {
     let stmt =  conn
-        .prepare("SELECT * FROM user_tokens WHERE token = $1;")
+        .prepare("SELECT * FROM user_tokens WHERE user_id = $1;")
         .unwrap();
-    for row in &stmt.query(&[&token]).unwrap() {
+    for row in &stmt.query(&[&user_id.as_bytes().to_vec()]).unwrap() {
+        let uid = uuid(row.get(1));
         return Ok(
             UserToken {
                 id: row.get(0),
-                username: row.get(1),
-                token: row.get(2),
-                expires: row.get(3),
-            })
-    }
-    Err("access_token not found")
-}
-
-pub fn get_by_username(username: &str, conn: &Connection) -> Result<UserToken, &'static str> {
-    let stmt =  conn
-        .prepare("SELECT * FROM user_tokens WHERE username = $1;")
-        .unwrap();
-    for row in &stmt.query(&[&username]).unwrap() {
-        return Ok(
-            UserToken {
-                id: row.get(0),
-                username: row.get(1),
+                user_id: uid,
                 token: row.get(2),
                 expires: row.get(3),
             })
@@ -87,7 +75,7 @@ pub fn update(id: &i64, token: &Vec<u8>, expires: &DateTime<Utc>, conn: &Connect
 // Delete access_token for a user
 pub fn delete(id: &i64, conn: &Connection) -> bool {
     let stmt = conn
-        .prepare("DELETE FROM tokens WHERE id = $1")
+        .prepare("DELETE FROM user_tokens WHERE id = $1")
         .unwrap();
     let success = stmt.execute(&[&id]).unwrap();
     if success == 0 {
