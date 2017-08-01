@@ -2,6 +2,8 @@ use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use postgres::Connection;
 
+use super::*;
+
 #[derive(Deserialize)]
 pub struct NewUser {
     pub username: String,
@@ -64,8 +66,7 @@ pub fn get_by_username(username: &str, conn: &Connection) -> Result<User, &'stat
         .prepare("SELECT * FROM users WHERE username = $1;")
         .unwrap();
     for row in &stmt.query(&[&username]).unwrap() {
-        let id: Vec<u8> = row.get(0);
-        let user_id = Uuid::from_bytes(&id).unwrap();
+        let user_id = uuid(row.get(0));
         return Ok(
             User {
                 id: user_id,
@@ -77,4 +78,16 @@ pub fn get_by_username(username: &str, conn: &Connection) -> Result<User, &'stat
             })
     }
     Err("User not found")
+}
+
+pub fn inactivate(user_id: &Uuid, conn: &Connection) -> bool {
+    let stmt = conn
+        .prepare("UPDATE users SET active = false WHERE user_id = $1;")
+        .unwrap();
+    let success = stmt.execute(&[&user_id.as_bytes().to_vec()]).unwrap();
+    if success == 0 {
+        false
+    } else {
+        true
+    }
 }
