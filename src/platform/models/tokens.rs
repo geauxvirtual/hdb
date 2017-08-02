@@ -1,5 +1,4 @@
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 use postgres::Connection;
 
 use super::*;
@@ -7,7 +6,6 @@ use super::*;
 pub struct NewUserToken {
     pub user_id: Uuid,
     pub token: Vec<u8>,
-    pub expires: DateTime<Utc>,
 }
 
 #[derive(Debug)]
@@ -15,20 +13,18 @@ pub struct UserToken {
     pub id: i64,
     pub user_id: Uuid,
     pub token: Vec<u8>,
-    pub expires: DateTime<Utc>,
 }
 
 pub fn create(token: NewUserToken, conn: &Connection) -> bool {
     let stmt = conn
         .prepare("INSERT INTO user_tokens
-        (user_id, token, expires)
+        (user_id, token)
         VALUES
-        ($1, $2, $3);")
+        ($1, $2);")
         .unwrap();
     let success = stmt.execute(&[
                  &token.user_id.as_bytes().to_vec(),
-                 &token.token,
-                 &token.expires])
+                 &token.token])
         .unwrap();
     if success == 0 {
         return false;
@@ -47,7 +43,6 @@ pub fn get_by_user_id(user_id: &Uuid, conn: &Connection) -> Result<UserToken, &'
                 id: row.get(0),
                 user_id: uid,
                 token: row.get(2),
-                expires: row.get(3),
             })
     }
     Err("access_token not found")
@@ -56,13 +51,12 @@ pub fn get_by_user_id(user_id: &Uuid, conn: &Connection) -> Result<UserToken, &'
 // Get all tokens for a user
 
 // Update access_token for a user
-pub fn update(id: &i64, token: &Vec<u8>, expires: &DateTime<Utc>, conn: &Connection) -> bool {
+pub fn update(id: &i64, token: &Vec<u8>, conn: &Connection) -> bool {
     let stmt = conn
-        .prepare("UPDATE user_tokens SET (token, expires) = ($1, $2) WHERE id = $3;")
+        .prepare("UPDATE user_tokens SET token = $1 WHERE id = $2;")
         .unwrap();
     let success = stmt.execute(&[
                                &token,
-                               &expires,
                                &id])
         .unwrap();
     if success == 0 {
