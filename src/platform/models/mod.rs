@@ -1,5 +1,6 @@
 use uuid::Uuid;
 
+pub mod activities;
 pub mod users;
 pub mod tokens;
 
