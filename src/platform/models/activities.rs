@@ -6,16 +6,16 @@ use super::*;
 pub struct NewActivity {
     pub user_id: Uuid,
     pub filename: String,
-    pub a_type: Option<String>,
+    pub activity_type: Option<String>,
     pub name: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Activity{
     pub id: i64,
     pub user_id: Uuid,
     pub filename: String,
-    pub a_type: String,
+    pub activity_type: String,
     pub name: String,
 }
 
@@ -31,7 +31,7 @@ pub fn create(activity: NewActivity, conn: &Connection) -> Result<Activity, &'st
     for row in &stmt.query(&[
                  &activity.user_id.as_bytes().to_vec(),
                  &activity.filename,
-                 &activity.a_type.unwrap_or("".to_string()),
+                 &activity.activity_type.unwrap_or("".to_string()),
                  &activity.name.unwrap_or("".to_string())])
         .unwrap() {
             let uid = uuid(row.get(1));
@@ -40,7 +40,7 @@ pub fn create(activity: NewActivity, conn: &Connection) -> Result<Activity, &'st
                     id: row.get(0),
                     user_id: uid,
                     filename: row.get(2),
-                    a_type: row.get(3),
+                    activity_type: row.get(3),
                     name: row.get(4),
                 }
             )
