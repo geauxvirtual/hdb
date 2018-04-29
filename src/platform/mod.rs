@@ -15,7 +15,7 @@ pub type Pool = r2d2::Pool<PostgresConnectionManager>;
 pub type PoolConnection = r2d2::PooledConnection<PostgresConnectionManager>;
 
 pub struct Database {
-    conn_string: String,
+    connection_string: String,
     ssl: OpenSsl,
 }
 
@@ -31,20 +31,20 @@ impl Database {
             c.cert_key_file,
             c.ca_file);
         Database {
-            conn_string: cs,
+            connection_string: cs,
             ssl: negotiator
         }
     }
 
     pub fn connect(self) -> Connection {
         Connection::connect(
-            self.conn_string,
+            self.connection_string,
             TlsMode::Require(&self.ssl)).unwrap()
         }
 
     pub fn pool (self) -> Pool {
         let manager = PostgresConnectionManager::new(
-            self.conn_string,
+            self.connection_string,
             R2d2TlsMode::Require(Box::new(self.ssl)))
             .unwrap();
         // TODO Allow configuring of pool settings
