@@ -8,6 +8,6 @@ Build
 -----
 
 ```
-rustup run nightly cargo build --all-features
+cargo build --all-features
 ```
 
