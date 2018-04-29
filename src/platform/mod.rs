@@ -48,8 +48,7 @@ impl Database {
             R2d2TlsMode::Require(Box::new(self.ssl)))
             .unwrap();
         // TODO Allow configuring of pool settings
-        let config = r2d2::Config::default();
-        r2d2::Pool::new(config, manager).unwrap()
+        r2d2::Pool::new(manager).unwrap()
     }
 }
 
@@ -74,15 +73,12 @@ fn ssl_builder(
     -> OpenSsl {
         let mut builder = SslConnectorBuilder::new(SslMethod::tls()).unwrap();
         builder
-            .builder_mut()
             .set_ca_file(ca_file)
             .unwrap();
         builder
-            .builder_mut()
             .set_certificate_file(cert_file, X509_FILETYPE_PEM)
             .unwrap();
         builder
-            .builder_mut()
             .set_private_key_file(cert_key_file, X509_FILETYPE_PEM)
             .unwrap();
 
